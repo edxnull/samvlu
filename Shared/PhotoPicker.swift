@@ -11,24 +11,25 @@ import PhotosUI
 @available(iOS 16.0, *)
 struct PhotoPicker: View {
     @State private var text = "\"Twelve significant photograps in any one year is a good crop\" \n --Ansel Adams\""
-    @State private var selectedItems: [PhotosPickerItem] = []
+    @State private var selectedItems: [Data] = []
     @State private var sItem: PhotosPickerItem? = nil
-    @State private var selectedImageData: Data? = nil
     var body: some View {
         VStack {
             HStack{
                 Group {
-                    Button(action: {}, label: {
+                    Button(action: {
+                        selectedItems.removeAll()
+                    }, label: {
                         Image(systemName: "chevron.left")
                     })
                     Spacer()
                     PhotosPicker(selection: $sItem, matching: .images) {
                         Image(systemName: "camera.fill")
                     }
-                    .onChange(of: sItem) { newItem in
+                    .onChange(of: sItem) { _ in
                         Task {
-                            if let data = try? await newItem?.loadTransferable(type: Data.self) {
-                                selectedImageData = data
+                            if let data = try? await sItem?.loadTransferable(type: Data.self) {
+                                selectedItems.append(data)
                             }
                         }
                     }
@@ -43,11 +44,15 @@ struct PhotoPicker: View {
                     .lineLimit(5...10)
                     .padding()
                     .font(.system(size: 27))
-                if let selectedImageData, let uiImage = UIImage(data: selectedImageData) {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 350, height: 350)
+                ScrollView {
+                    ForEach($selectedItems, id: \.self) {
+                        if let img = UIImage(data: $0.wrappedValue) {
+                            Image(uiImage: img)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 350, height: 250)
+                        }
+                    }
                 }
             }
             .frame(alignment: .trailing)
