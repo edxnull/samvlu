@@ -13,6 +13,7 @@ struct PhotoPicker: View {
     @State private var text = "\"Twelve significant photograps in any one year is a good crop\" \n --Ansel Adams\""
     @State private var selectedItems: [Data] = []
     @State private var sItem: PhotosPickerItem? = nil
+    
     var body: some View {
         VStack {
             HStack{
@@ -29,7 +30,9 @@ struct PhotoPicker: View {
                     .onChange(of: sItem) { _ in
                         Task {
                             if let data = try? await sItem?.loadTransferable(type: Data.self) {
-                                selectedItems.append(data)
+                                if !selectedItems.contains(data) {
+                                    selectedItems.append(data)
+                                }
                             }
                         }
                     }
