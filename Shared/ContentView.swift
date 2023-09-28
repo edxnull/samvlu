@@ -9,7 +9,11 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        SwipeToDismissKeyboard()
+        if #available(iOS 16.0, *) {
+            PhotoPicker()
+        } else {
+            // Fallback on earlier versions
+        }
     }
 }
 
